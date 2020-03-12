@@ -1,10 +1,13 @@
 import { bytes_to_hex, Sha256 } from "asmcrypto.js"
-import { TFileInformation } from "./types"
+import { TFileInformation, TdrFile } from "./types"
 
 export const getFileInformation: TFileInformation = async files =>
   await Promise.all(
     files.map(async file => ({
-      checksum: await generateHash(file)
+      checksum: await generateHash(file),
+      size: file.size,
+      lastModified: new Date(file.lastModified),
+      path: (<TdrFile>file).webkitRelativePath
     }))
   )
 
