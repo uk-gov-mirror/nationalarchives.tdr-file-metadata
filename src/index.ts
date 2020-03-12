@@ -1,9 +1,5 @@
 import { bytes_to_hex, Sha256 } from "asmcrypto.js"
-
-export interface IFileInformation {
-  checksum: string
-}
-type TFileInformation = (files: File[]) => Promise<IFileInformation[]>
+import { TFileInformation } from "./types"
 
 export const getFileInformation: TFileInformation = async files =>
   await Promise.all(
@@ -24,7 +20,6 @@ const sliceToUintArray: (blob: Blob) => Promise<Uint8Array> = async blob => {
     }
   })
 }
-
 export const generateHash: (file: File) => Promise<string> = async file => {
   const chunkSize = 100000000
   const chunkCount = Math.ceil(file.size / chunkSize)
