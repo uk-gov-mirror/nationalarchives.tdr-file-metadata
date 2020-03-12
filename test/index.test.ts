@@ -41,3 +41,20 @@ test("returns the correct path", async () => {
   const result = await getFileInformation([file])
   expect(result[0].path).toEqual("/a/path")
 })
+
+test("calls the callback function correctly", async () => {
+  const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
+  const file = new File([blob], "")
+  const callback = jest.fn()
+  await getFileInformation([file, file], callback)
+
+  expect(callback.mock.calls).toHaveLength(2)
+  expect(callback.mock.calls[0][0]).toStrictEqual({
+    totalFiles: 2,
+    processedFiles: 1
+  })
+  expect(callback.mock.calls[1][0]).toStrictEqual({
+    totalFiles: 2,
+    processedFiles: 2
+  })
+})
