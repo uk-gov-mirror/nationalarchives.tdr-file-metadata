@@ -16,23 +16,23 @@ export const extractFileMetadata: TFileMetadata = async (
   let processedChunks = 0
   const totalChunks = getTotalChunks(files, chunkSize)
 
+  const chunkProgress: TChunkProgressFunction = () => {
+    processedChunks += 1
+    const ratioProcessed = processedChunks / totalChunks
+    const percentageProcessed = Math.round(ratioProcessed * 100)
+    const totalFiles = files.length
+    const processedFiles = Math.floor(ratioProcessed * totalFiles)
+    if (progressFunction) {
+      progressFunction({
+        totalFiles,
+        processedFiles,
+        percentageProcessed
+      })
+    }
+  }
+
   return await Promise.all(
     files.map(async file => {
-      const chunkProgress: TChunkProgressFunction = () => {
-        processedChunks += 1
-        const ratioProcessed = processedChunks / totalChunks
-        const percentageProcessed = Math.round(ratioProcessed * 100)
-        const totalFiles = files.length
-        const processedFiles = Math.floor(ratioProcessed * totalFiles)
-        if (progressFunction) {
-          progressFunction({
-            totalFiles,
-            processedFiles,
-            percentageProcessed
-          })
-        }
-      }
-
       const result = {
         checksum: await generateHash(file, chunkSize, chunkProgress),
         size: file.size,
