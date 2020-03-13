@@ -1,29 +1,56 @@
 import { bytes_to_hex, Sha256 } from "asmcrypto.js"
-import { TFileInformation, TdrFile } from "./types"
+import {
+  TFileMetadata,
+  TdrFile,
+  TGenerateMetadata,
+  TTotalChunks,
+  TSliceToArray,
+  TChunkProgressFunction
+} from "./types"
 
-export const getFileInformation: TFileInformation = async (
+export const extractFileMetadata: TFileMetadata = async (
   files,
-  progressFunction
+  progressFunction,
+  chunkSize = 100000000
 ) => {
-  let processedFiles = 1
+  let processedChunks = 0
+  const totalChunks = getTotalChunks(files, chunkSize)
+
   return await Promise.all(
     files.map(async file => {
+      const chunkProgress: TChunkProgressFunction = () => {
+        processedChunks += 1
+        const ratioProcessed = processedChunks / totalChunks
+        const percentageProcessed = Math.round(ratioProcessed * 100)
+        const totalFiles = files.length
+        const processedFiles = Math.floor(ratioProcessed * totalFiles)
+        if (progressFunction) {
+          progressFunction({
+            totalFiles,
+            processedFiles,
+            percentageProcessed
+          })
+        }
+      }
+
       const result = {
-        checksum: await generateHash(file),
+        checksum: await generateHash(file, chunkSize, chunkProgress),
         size: file.size,
         lastModified: new Date(file.lastModified),
         path: (<TdrFile>file).webkitRelativePath
-      }
-      if (progressFunction) {
-        progressFunction({ totalFiles: files.length, processedFiles })
-        processedFiles += 1
       }
       return result
     })
   )
 }
 
-const sliceToUintArray: (blob: Blob) => Promise<Uint8Array> = async blob => {
+const getTotalChunks: TTotalChunks = (files, chunkSize) => {
+  return files
+    .map(file => Math.ceil(file.size / chunkSize))
+    .reduce((a, b) => a + b)
+}
+
+const sliceToUintArray: TSliceToArray = async blob => {
   const fileReader = new FileReader()
   fileReader.readAsArrayBuffer(blob)
   return await new Promise(resolve => {
@@ -35,8 +62,11 @@ const sliceToUintArray: (blob: Blob) => Promise<Uint8Array> = async blob => {
     }
   })
 }
-export const generateHash: (file: File) => Promise<string> = async file => {
-  const chunkSize = 100000000
+export const generateHash: TGenerateMetadata = async (
+  file,
+  chunkSize,
+  chunkProgressFunction
+) => {
   const chunkCount = Math.ceil(file.size / chunkSize)
   const sha256 = new Sha256()
 
@@ -45,6 +75,7 @@ export const generateHash: (file: File) => Promise<string> = async file => {
     const end = start + chunkSize
     const slice: Blob = file.slice(start, end)
     sha256.process(await sliceToUintArray(slice))
+    chunkProgressFunction()
   }
 
   const result = sha256.finish().result!
