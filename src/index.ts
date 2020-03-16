@@ -20,12 +20,8 @@ export const extractFileMetadata: TFileMetadata = async (
     processedChunks += 1
     const ratioProcessed = processedChunks / totalChunks
     const percentageProcessed = Math.round(ratioProcessed * 100)
-    const totalFiles = files.length
-    const processedFiles = Math.floor(ratioProcessed * totalFiles)
     if (progressFunction) {
       progressFunction({
-        totalFiles,
-        processedFiles,
         percentageProcessed
       })
     }

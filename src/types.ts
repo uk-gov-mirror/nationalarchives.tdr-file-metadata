@@ -6,8 +6,6 @@ export interface IFileMetadata {
 }
 
 interface IProgressInformation {
-  totalFiles: number
-  processedFiles: number
   percentageProcessed: number
 }
 
@@ -21,8 +19,8 @@ export type TChunkProgressFunction = () => void
 
 export type TGenerateMetadata = (
   file: File,
-  procesedFiles: number,
-  progressFunction: TChunkProgressFunction
+  chunkSizeBytes: number,
+  chunkProgressFunction: TChunkProgressFunction
 ) => Promise<string>
 
 export type TTotalChunks = (files: File[], chunkSize: number) => number

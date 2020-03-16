@@ -58,23 +58,15 @@ test("calls the callback function correctly", async () => {
   await extractFileMetadata([file, file], callback, 10)
   expect(callback.mock.calls).toHaveLength(4)
   expect(callback.mock.calls[0][0]).toStrictEqual({
-    totalFiles: 2,
-    processedFiles: 0,
     percentageProcessed: 25
   })
   expect(callback.mock.calls[1][0]).toStrictEqual({
-    totalFiles: 2,
-    processedFiles: 1,
     percentageProcessed: 50
   })
   expect(callback.mock.calls[2][0]).toStrictEqual({
-    totalFiles: 2,
-    processedFiles: 1,
     percentageProcessed: 75
   })
   expect(callback.mock.calls[3][0]).toStrictEqual({
-    totalFiles: 2,
-    processedFiles: 2,
     percentageProcessed: 100
   })
 })
