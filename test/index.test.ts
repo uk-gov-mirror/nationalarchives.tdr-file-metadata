@@ -55,18 +55,59 @@ test("calls the callback function correctly", async () => {
   const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
   const file = new File([blob], "")
   const callback = jest.fn()
+  const totalFiles = 2
   await extractFileMetadata([file, file], callback, 10)
-  expect(callback.mock.calls).toHaveLength(4)
-  expect(callback.mock.calls[0][0]).toStrictEqual({
-    percentageProcessed: 25
-  })
-  expect(callback.mock.calls[1][0]).toStrictEqual({
-    percentageProcessed: 50
-  })
-  expect(callback.mock.calls[2][0]).toStrictEqual({
-    percentageProcessed: 75
-  })
-  expect(callback.mock.calls[3][0]).toStrictEqual({
-    percentageProcessed: 100
-  })
+  const calls = callback.mock.calls
+  expect(calls).toHaveLength(6)
+  const expectedResults = [
+    [0, 25],
+    [0, 50],
+    [1, 50],
+    [1, 75],
+    [1, 100],
+    [2, 100]
+  ]
+
+  checkCallbackFunctionCalls(calls, expectedResults)
 })
+
+test("calls the callback function correctly for two differently sized files", async () => {
+  const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
+  const file = new File([blob], "")
+  const blobLonger = new Blob([
+    new Uint8Array(fs.readFileSync("test/testfile"))
+  ])
+  const fileLonger = new File([blobLonger], "")
+  const callback = jest.fn()
+  const totalFiles = 2
+  await extractFileMetadata([file, fileLonger], callback, 5)
+  const calls = callback.mock.calls
+
+  expect(calls).toHaveLength(10)
+  const expectedResults = [
+    [0, 13],
+    [0, 25],
+    [0, 38],
+    [0, 50],
+    [1, 50],
+    [1, 63],
+    [1, 75],
+    [1, 88],
+    [1, 100],
+    [2, 100]
+  ]
+  checkCallbackFunctionCalls(calls, expectedResults)
+})
+
+const checkCallbackFunctionCalls: (
+  calls: any[],
+  expectedResults: number[][]
+) => void = (calls, expectedResults) => {
+  const totalFiles = 2
+  for (let i = 0; i < calls.length; i += 1) {
+    const processedFiles = expectedResults[i][0]
+    const percentageProcessed = expectedResults[i][1]
+    const expectedResult = { totalFiles, processedFiles, percentageProcessed }
+    expect(calls[i][0]).toStrictEqual(expectedResult)
+  }
+}

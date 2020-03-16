@@ -5,8 +5,10 @@ export interface IFileMetadata {
   lastModified: Date
 }
 
-interface IProgressInformation {
+export interface IProgressInformation {
   percentageProcessed: number
+  totalFiles: number
+  processedFiles: number
 }
 
 export type TFileMetadata = (

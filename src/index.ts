@@ -2,10 +2,9 @@ import { bytes_to_hex, Sha256 } from "asmcrypto.js"
 import {
   TFileMetadata,
   TdrFile,
-  TGenerateMetadata,
   TTotalChunks,
   TSliceToArray,
-  TChunkProgressFunction
+  IFileMetadata
 } from "./types"
 
 export const extractFileMetadata: TFileMetadata = async (
@@ -14,30 +13,47 @@ export const extractFileMetadata: TFileMetadata = async (
   chunkSizeBytes = 100000000
 ) => {
   let processedChunks = 0
+  let processedFiles = 0
   const totalChunks = getTotalChunks(files, chunkSizeBytes)
-
-  const chunkProgress: TChunkProgressFunction = () => {
-    processedChunks += 1
-    const ratioProcessed = processedChunks / totalChunks
-    const percentageProcessed = Math.round(ratioProcessed * 100)
+  const updateProgress: (
+    processedChunks: number,
+    processedFiles: number
+  ) => void = (processedChunks, processedFiles) => {
     if (progressFunction) {
       progressFunction({
-        percentageProcessed
+        percentageProcessed: Math.round((processedChunks / totalChunks) * 100),
+        totalFiles: files.length,
+        processedFiles
       })
     }
   }
 
-  return await Promise.all(
-    files.map(async file => {
-      const result = {
-        checksum: await generateHash(file, chunkSizeBytes, chunkProgress),
-        size: file.size,
-        lastModified: new Date(file.lastModified),
-        path: (<TdrFile>file).webkitRelativePath
-      }
-      return result
+  const arr: IFileMetadata[] = []
+  for (const file of files) {
+    const chunkCount = Math.ceil(file.size / chunkSizeBytes)
+    const sha256 = new Sha256()
+    for (let i = 0; i < chunkCount; i += 1) {
+      const start = i * chunkSizeBytes
+      const end = start + chunkSizeBytes
+      const slice: Blob = file.slice(start, end)
+      sha256.process(await sliceToUintArray(slice))
+      processedChunks += 1
+      updateProgress(processedChunks, processedFiles)
+    }
+    const { size, lastModified } = file
+
+    const result = sha256.finish().result!
+    const checksum = bytes_to_hex(result).trim()
+    arr.push({
+      checksum,
+      size,
+      lastModified: new Date(lastModified),
+      path: (<TdrFile>file).webkitRelativePath
     })
-  )
+    processedFiles += 1
+    updateProgress(processedChunks, processedFiles)
+  }
+  return arr
 }
 
 const getTotalChunks: TTotalChunks = (files, chunkSizeBytes) => {
@@ -57,23 +73,4 @@ const sliceToUintArray: TSliceToArray = async blob => {
       }
     }
   })
-}
-export const generateHash: TGenerateMetadata = async (
-  file,
-  chunkSizeBytes,
-  chunkProgressFunction
-) => {
-  const chunkCount = Math.ceil(file.size / chunkSizeBytes)
-  const sha256 = new Sha256()
-
-  for (let i = 0; i < chunkCount; i += 1) {
-    const start = i * chunkSizeBytes
-    const end = start + chunkSizeBytes
-    const slice: Blob = file.slice(start, end)
-    sha256.process(await sliceToUintArray(slice))
-    chunkProgressFunction()
-  }
-
-  const result = sha256.finish().result!
-  return bytes_to_hex(result).trim()
 }
