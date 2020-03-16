@@ -10,6 +10,15 @@ test("returns the correct checksum for a file", async () => {
   )
 })
 
+test("returns the correct checksum for a file with a chunk size smaller than file size", async () => {
+  const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
+
+  const result = await extractFileMetadata([new File([blob], "")], jest.fn(), 1)
+  expect(result[0].checksum).toEqual(
+    "e2d0fe1585a63ec6009c8016ff8dda8b17719a637405a4e23c0ff81339148249"
+  )
+})
+
 test("returns correct number of results", async () => {
   const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
   const file: File = new File([blob], "")

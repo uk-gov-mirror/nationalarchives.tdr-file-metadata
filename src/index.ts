@@ -11,10 +11,10 @@ import {
 export const extractFileMetadata: TFileMetadata = async (
   files,
   progressFunction,
-  chunkSize = 100000000
+  chunkSizeBytes = 100000000
 ) => {
   let processedChunks = 0
-  const totalChunks = getTotalChunks(files, chunkSize)
+  const totalChunks = getTotalChunks(files, chunkSizeBytes)
 
   const chunkProgress: TChunkProgressFunction = () => {
     processedChunks += 1
@@ -34,7 +34,7 @@ export const extractFileMetadata: TFileMetadata = async (
   return await Promise.all(
     files.map(async file => {
       const result = {
-        checksum: await generateHash(file, chunkSize, chunkProgress),
+        checksum: await generateHash(file, chunkSizeBytes, chunkProgress),
         size: file.size,
         lastModified: new Date(file.lastModified),
         path: (<TdrFile>file).webkitRelativePath
@@ -44,9 +44,9 @@ export const extractFileMetadata: TFileMetadata = async (
   )
 }
 
-const getTotalChunks: TTotalChunks = (files, chunkSize) => {
+const getTotalChunks: TTotalChunks = (files, chunkSizeBytes) => {
   return files
-    .map(file => Math.ceil(file.size / chunkSize))
+    .map(file => Math.ceil(file.size / chunkSizeBytes))
     .reduce((a, b) => a + b)
 }
 
@@ -64,15 +64,15 @@ const sliceToUintArray: TSliceToArray = async blob => {
 }
 export const generateHash: TGenerateMetadata = async (
   file,
-  chunkSize,
+  chunkSizeBytes,
   chunkProgressFunction
 ) => {
-  const chunkCount = Math.ceil(file.size / chunkSize)
+  const chunkCount = Math.ceil(file.size / chunkSizeBytes)
   const sha256 = new Sha256()
 
   for (let i = 0; i < chunkCount; i += 1) {
-    const start = i * chunkSize
-    const end = start + chunkSize
+    const start = i * chunkSizeBytes
+    const end = start + chunkSizeBytes
     const slice: Blob = file.slice(start, end)
     sha256.process(await sliceToUintArray(slice))
     chunkProgressFunction()
