@@ -1,0 +1,19 @@
+def versionTag = "v${env.BUILD_NUMBER}"
+
+pipeline {
+  agent none
+
+  stages {
+    stage('Post-build') {
+      agent {
+        ecs {
+          inheritFrom "npm"
+        }
+        steps {
+          checkout scm
+          sh "npm test"
+        }
+      }
+    }
+  }
+}

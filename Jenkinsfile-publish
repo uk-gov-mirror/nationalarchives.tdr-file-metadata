@@ -1,0 +1,24 @@
+def versionTag = "v${env.BUILD_NUMBER}"
+
+pipeline {
+  agent none
+
+  stages {
+    stage("Publish package") {
+        agent {
+            ecs {
+                inheritFrom "npm"
+            }
+        }
+        steps {
+            checkout scm
+            sh 'npm ci'
+            sh 'npm run build:prod'
+            withCredentials([string(credentialsId: 'npm-login', variable: 'LOGIN_TOKEN')]) {
+                sh "npm config set //registry.npmjs.org/:_authToken=$LOGIN_TOKEN"
+                sh 'npm publish'
+            }
+        }
+    }
+  }
+}
