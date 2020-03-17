@@ -1,5 +1,3 @@
-def versionTag = "v${env.BUILD_NUMBER}"
-
 pipeline {
   agent none
 
