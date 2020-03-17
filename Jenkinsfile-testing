@@ -12,6 +12,7 @@ pipeline {
         }
         steps {
             checkout scm
+            sh 'npm ci'
             sh 'npm test'
         }
     }
