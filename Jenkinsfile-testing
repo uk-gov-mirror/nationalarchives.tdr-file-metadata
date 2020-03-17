@@ -4,16 +4,16 @@ pipeline {
   agent none
 
   stages {
-    stage('Post-build') {
-      agent {
-        ecs {
-          inheritFrom "npm"
+    stage("Publish package") {
+        agent {
+            ecs {
+                inheritFrom "npm"
+            }
         }
         steps {
-          checkout scm
-          sh "npm test"
+            checkout scm
+            sh 'npm test'
         }
-      }
     }
   }
 }
