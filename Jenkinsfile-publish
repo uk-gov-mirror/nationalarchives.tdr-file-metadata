@@ -1,5 +1,3 @@
-def versionTag = "v${env.BUILD_NUMBER}"
-
 pipeline {
   agent none
 
@@ -18,8 +16,13 @@ pipeline {
             checkout scm
             sh 'npm ci'
             sh 'npm run build:prod'
+            sh 'git config --global user.email tna-digital-archiving-jenkins@nationalarchives.gov.uk'
+            sh 'git config --global user.name tna-digital-archiving-jenkins'
+            sshagent(['github-jenkins']) {
+              sh "npm version ${params.VERSION}"
+            }
+            
             withCredentials([string(credentialsId: 'npm-login', variable: 'LOGIN_TOKEN')]) {
-                sh "npm version $VERSION"
                 sh "npm config set //registry.npmjs.org/:_authToken=$LOGIN_TOKEN"
                 sh 'npm publish --access public'
             }
