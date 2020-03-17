@@ -16,7 +16,7 @@ pipeline {
             sh 'npm run build:prod'
             withCredentials([string(credentialsId: 'npm-login', variable: 'LOGIN_TOKEN')]) {
                 sh "npm config set //registry.npmjs.org/:_authToken=$LOGIN_TOKEN"
-                sh 'npm publish'
+                sh 'npm publish --access public'
             }
         }
     }
