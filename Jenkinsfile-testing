@@ -1,0 +1,19 @@
+pipeline {
+  agent none
+
+  stages {
+    stage("Publish package") {
+        agent {
+            ecs {
+                inheritFrom "npm"
+            }
+        }
+        steps {
+            checkout scm
+            sh 'npm ci'
+            sh 'npm test'
+	    sh 'npm run lint'
+        }
+    }
+  }
+}

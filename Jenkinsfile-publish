@@ -1,0 +1,32 @@
+pipeline {
+  agent none
+
+  parameters {
+    choice(name: "VERSION", choices: ["patch", "minor", "major"], description: "The stage you are building the front end for")
+  }
+  stages {
+    stage("Publish package") {
+        agent {
+            ecs {
+                inheritFrom "npm"
+            }
+        }
+        
+        steps {
+            checkout scm
+            sh 'npm ci'
+            sh 'npm run build:prod'
+            sh 'git config --global user.email tna-digital-archiving-jenkins@nationalarchives.gov.uk'
+            sh 'git config --global user.name tna-digital-archiving-jenkins'
+            sshagent(['github-jenkins']) {
+              sh "npm version ${params.VERSION}"
+            }
+            
+            withCredentials([string(credentialsId: 'npm-login', variable: 'LOGIN_TOKEN')]) {
+                sh "npm config set //registry.npmjs.org/:_authToken=$LOGIN_TOKEN"
+                sh 'npm publish --access public'
+            }
+        }
+    }
+  }
+}
