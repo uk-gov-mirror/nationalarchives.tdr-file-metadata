@@ -57,7 +57,7 @@ export const extractFileMetadata: TFileMetadata = async (
 }
 
 const getTotalChunks: TTotalChunks = (files, chunkSizeBytes) => {
-  return files
+  return Array.from(files)
     .map(file => Math.ceil(file.size / chunkSizeBytes))
     .reduce((a, b) => a + b)
 }
