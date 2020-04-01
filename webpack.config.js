@@ -19,6 +19,7 @@ module.exports = {
     plugins: [new DtsBundlePlugin()],
     output: {
         filename: 'index.js',
+        libraryTarget: "umd",
         path: path.resolve(__dirname, 'dist'),
     },
 }
