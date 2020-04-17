@@ -3,6 +3,7 @@ export interface IFileMetadata {
   size: number
   path: string
   lastModified: Date
+  file: File
 }
 
 export interface IProgressInformation {

@@ -48,7 +48,8 @@ export const extractFileMetadata: TFileMetadata = async (
       checksum,
       size,
       lastModified: new Date(lastModified),
-      path: (<TdrFile>file).webkitRelativePath
+      path: (<TdrFile>file).webkitRelativePath,
+      file
     })
     processedFiles += 1
     updateProgress(processedChunks, processedFiles)

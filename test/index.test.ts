@@ -51,6 +51,14 @@ test("returns the correct path", async () => {
   expect(result[0].path).toEqual("/a/path")
 })
 
+test("returns the original file", async () => {
+  const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
+  const file = new File([blob], "")
+  Object.defineProperty(file, "webkitRelativePath", { value: "/a/path" })
+  const result = await extractFileMetadata([file])
+  expect(result[0].file).toEqual(file)
+})
+
 test("calls the callback function correctly", async () => {
   const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
   const file = new File([blob], "")
