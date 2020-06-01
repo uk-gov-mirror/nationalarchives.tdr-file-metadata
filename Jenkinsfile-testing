@@ -1,3 +1,7 @@
+library("tdr-jenkinslib")
+
+def repo = "tdr-file-metadata"
+
 pipeline {
   agent none
 
@@ -9,11 +13,30 @@ pipeline {
             }
         }
         steps {
+            script {
+                tdr.reportStartOfBuildToGitHub(repo)
+            }
             checkout scm
             sh 'npm ci'
             sh 'npm test'
-	    sh 'npm run lint'
+	        sh 'npm run lint'
         }
     }
   }
+  post {
+          failure {
+            node('master') {
+              script {
+                tdr.reportFailedBuildToGitHub(repo)
+              }
+            }
+          }
+          success {
+            node('master') {
+              script {
+                tdr.reportSuccessfulBuildToGitHub(repo)
+              }
+            }
+          }
+      }
 }
