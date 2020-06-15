@@ -1,3 +1,7 @@
+@Library(tdr-jenkinslib@TDR-257-create-pull-request-function) _
+
+def versionBumpBranch = "version-bump-${BUILD_NUMBER}-${params.VERSION}"
+
 pipeline {
   agent none
 
@@ -5,7 +9,18 @@ pipeline {
     choice(name: "VERSION", choices: ["patch", "minor", "major"], description: "The stage you are building the front end for")
   }
   stages {
-    stage("Publish package") {
+    stage("Create new GitHub branch") {
+      agent {
+        label "master"
+      }
+      steps {
+        checkout scm
+        script {
+          tdr.createGitHubBranch(versionBumpBranch)
+        }
+      }
+    }
+    stage("Publish package and commit changes to GitHub") {
         agent {
             ecs {
                 inheritFrom "npm"
@@ -13,7 +28,8 @@ pipeline {
         }
         
         steps {
-            checkout scm
+            sh "git checkout ${versionBumpBranch}"
+
             sh 'npm ci'
             sh 'npm run build:prod'
             sh 'git config --global user.email tna-digital-archiving-jenkins@nationalarchives.gov.uk'
@@ -26,7 +42,27 @@ pipeline {
                 sh "npm config set //registry.npmjs.org/:_authToken=$LOGIN_TOKEN"
                 sh 'npm publish --access public'
             }
+
+            script(
+              tdr.commitChangesToGitHubBranch("Version updated")
+            )
         }
+    }
+    stage("Create GitHub pull request") {
+      agent {
+        label "master"
+      }
+      steps {
+        script {
+          tdr.createGitHubPullRequest(
+            pullRequestTitle: "Version Bump ${BUILD_NUMBER} ${params.VERSION}",
+            buildUrl: env.BUILD_URL,
+            repo: "tdr-file-metadata",
+            branchToMergeTo: "master",
+            branchToMerge: versionBumpBranch
+          )
+        }
+      }
     }
   }
 }
