@@ -1,4 +1,4 @@
-@Library(tdr-jenkinslib@TDR-257-create-pull-request-function) _
+library(tdr-jenkinslib)
 
 def versionBumpBranch = "version-bump-${BUILD_NUMBER}-${params.VERSION}"
 
@@ -43,19 +43,19 @@ pipeline {
                 sh 'npm publish --access public'
             }
 
-            script(
-              tdr.commitChangesToGitHubBranch("Version updated")
-            )
+            script {
+              tdr.commitAndPushGitHubBranch(versionBumpBranch, "Version bump from build ${env.BUILD_NUMBER}")
+            }
         }
     }
-    stage("Create GitHub pull request") {
+    stage("Create version bump pull request") {
       agent {
         label "master"
       }
       steps {
         script {
           tdr.createGitHubPullRequest(
-            pullRequestTitle: "Version Bump ${BUILD_NUMBER} ${params.VERSION}",
+            pullRequestTitle: "Version Bump from build number ${BUILD_NUMBER}",
             buildUrl: env.BUILD_URL,
             repo: "tdr-file-metadata",
             branchToMergeTo: "master",
