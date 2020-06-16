@@ -9,24 +9,12 @@ pipeline {
     choice(name: "VERSION", choices: ["patch", "minor", "major"], description: "The stage you are building the front end for")
   }
   stages {
-    stage("Create new GitHub branch") {
-      agent {
-        label "master"
-      }
-      steps {
-        checkout scm
-        script {
-          tdr.createGitHubBranch(versionBumpBranch)
-        }
-      }
-    }
     stage("Publish package and commit changes to GitHub") {
         agent {
             ecs {
                 inheritFrom "npm"
             }
         }
-        
         steps {
             sh "git checkout ${versionBumpBranch}"
 
