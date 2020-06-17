@@ -16,24 +16,28 @@ pipeline {
             }
         }
         steps {
-            sh "git checkout ${versionBumpBranch}"
+          script {
+            tdr.configureJenkinsGitUser()
+          }
 
-            sh 'npm ci'
-            sh 'npm run build:prod'
-            sh 'git config --global user.email tna-digital-archiving-jenkins@nationalarchives.gov.uk'
-            sh 'git config --global user.name tna-digital-archiving-jenkins'
-            sshagent(['github-jenkins']) {
-              sh "npm version ${params.VERSION}"
-            }
+          sh "git checkout ${versionBumpBranch}"
+
+          sh 'npm ci'
+          sh 'npm run build:prod'
+
+          //commits change to the branch
+          sshagent(['github-jenkins']) {
+            sh "npm version ${params.VERSION}"
+          }
             
-            withCredentials([string(credentialsId: 'npm-login', variable: 'LOGIN_TOKEN')]) {
-                sh "npm config set //registry.npmjs.org/:_authToken=$LOGIN_TOKEN"
-                sh 'npm publish --access public'
-            }
+          withCredentials([string(credentialsId: 'npm-login', variable: 'LOGIN_TOKEN')]) {
+            sh "npm config set //registry.npmjs.org/:_authToken=$LOGIN_TOKEN"
+            sh 'npm publish --access public'
+          }
 
-            script {
-              tdr.commitAndPushGitHubBranch(versionBumpBranch, "Version bump from build ${env.BUILD_NUMBER}")
-            }
+          script {
+              tdr.pushGitHubBranch(versionBumpBranch)
+          }
         }
     }
     stage("Create version bump pull request") {
