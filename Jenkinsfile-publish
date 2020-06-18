@@ -21,9 +21,12 @@ pipeline {
             script {
               tdr.configureJenkinsGitUser()
             }
+            
             sh "git checkout -b ${versionBumpBranch}"
 
-            tdr.pushGitHubBranch(versionBumpBranch)
+            script {
+              tdr.pushGitHubBranch(versionBumpBranch)
+            }
           }
         }
         stage("Update npm version") {
