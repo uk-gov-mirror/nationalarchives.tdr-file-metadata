@@ -1,4 +1,4 @@
-library(tdr-jenkinslib)
+library("tdr-jenkinslib")
 
 def versionBumpBranch = "version-bump-${BUILD_NUMBER}-${params.VERSION}"
 
@@ -6,7 +6,7 @@ pipeline {
   agent none
 
   parameters {
-    choice(name: "VERSION", choices: ["patch", "minor", "major"], description: "The stage you are building the front end for")
+    choice(name: "VERSION", choices: ["patch", "minor", "major"], description: "The version of the library to be deployed")
   }
   stages {
     stage("Publish package") {
