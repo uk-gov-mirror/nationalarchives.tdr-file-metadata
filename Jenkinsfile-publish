@@ -23,10 +23,6 @@ pipeline {
             }
             
             sh "git checkout -b ${versionBumpBranch}"
-
-            script {
-              tdr.pushGitHubBranch(versionBumpBranch)
-            }
           }
         }
         stage("Update npm version") {
@@ -43,6 +39,11 @@ pipeline {
               sh "npm config set //registry.npmjs.org/:_authToken=$LOGIN_TOKEN"
               sh 'npm publish --access public'
             }
+          }
+        }
+        stage("Push version bump GitHub branch") {
+          script {
+            tdr.pushGitHubBranch(versionBumpBranch)
           }
         }
       }
