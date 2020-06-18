@@ -42,8 +42,10 @@ pipeline {
           }
         }
         stage("Push version bump GitHub branch") {
-          script {
-            tdr.pushGitHubBranch(versionBumpBranch)
+          steps {
+            script {
+              tdr.pushGitHubBranch(versionBumpBranch)
+            }
           }
         }
       }
