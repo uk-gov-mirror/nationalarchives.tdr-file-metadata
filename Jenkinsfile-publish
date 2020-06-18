@@ -30,7 +30,7 @@ pipeline {
             sh 'npm ci'
             sh 'npm run build:prod'
 
-            //commits change to the origin branch
+            //commits change to the branch
             sshagent(['github-jenkins']) {
               sh "npm version ${params.VERSION}"
             }
