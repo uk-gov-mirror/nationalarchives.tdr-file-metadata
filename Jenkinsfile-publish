@@ -9,36 +9,40 @@ pipeline {
     choice(name: "VERSION", choices: ["patch", "minor", "major"], description: "The stage you are building the front end for")
   }
   stages {
-    stage("Publish package and commit changes to GitHub") {
-        agent {
-            ecs {
-                inheritFrom "npm"
-            }
+    stage("Publish package") {
+      agent {
+        ecs {
+          inheritFrom "npm"
         }
-        steps {
-          script {
-            tdr.configureJenkinsGitUser()
-          }
+      }
+      stages {
+        stage("Create and push version bump GitHub branch") {
+          steps {
+            script {
+              tdr.configureJenkinsGitUser()
+            }
+            sh "git checkout -b ${versionBumpBranch}"
 
-          sh "git checkout ${versionBumpBranch}"
-
-          script {
             tdr.pushGitHubBranch(versionBumpBranch)
           }
+        }
+        stage("Update npm version") {
+          steps {
+            sh 'npm ci'
+            sh 'npm run build:prod'
 
-          sh 'npm ci'
-          sh 'npm run build:prod'
+            //commits change to the origin branch
+            sshagent(['github-jenkins']) {
+              sh "npm version ${params.VERSION}"
+            }
 
-          //commits change to the branch
-          sshagent(['github-jenkins']) {
-            sh "npm version ${params.VERSION}"
-          }
-            
-          withCredentials([string(credentialsId: 'npm-login', variable: 'LOGIN_TOKEN')]) {
-            sh "npm config set //registry.npmjs.org/:_authToken=$LOGIN_TOKEN"
-            sh 'npm publish --access public'
+            withCredentials([string(credentialsId: 'npm-login', variable: 'LOGIN_TOKEN')]) {
+              sh "npm config set //registry.npmjs.org/:_authToken=$LOGIN_TOKEN"
+              sh 'npm publish --access public'
+            }
           }
         }
+      }
     }
     stage("Create version bump pull request") {
       agent {
