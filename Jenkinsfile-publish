@@ -1,3 +1,7 @@
+library(tdr-jenkinslib)
+
+def versionBumpBranch = "version-bump-${BUILD_NUMBER}-${params.VERSION}"
+
 pipeline {
   agent none
 
@@ -6,27 +10,55 @@ pipeline {
   }
   stages {
     stage("Publish package") {
-        agent {
-            ecs {
-                inheritFrom "npm"
-            }
+      agent {
+        ecs {
+          inheritFrom "npm"
         }
-        
-        steps {
-            checkout scm
+      }
+      stages {
+        stage("Create and push version bump GitHub branch") {
+          steps {
+            script {
+              tdr.configureJenkinsGitUser()
+            }
+            sh "git checkout -b ${versionBumpBranch}"
+
+            tdr.pushGitHubBranch(versionBumpBranch)
+          }
+        }
+        stage("Update npm version") {
+          steps {
             sh 'npm ci'
             sh 'npm run build:prod'
-            sh 'git config --global user.email tna-digital-archiving-jenkins@nationalarchives.gov.uk'
-            sh 'git config --global user.name tna-digital-archiving-jenkins'
+
+            //commits change to the origin branch
             sshagent(['github-jenkins']) {
               sh "npm version ${params.VERSION}"
             }
-            
+
             withCredentials([string(credentialsId: 'npm-login', variable: 'LOGIN_TOKEN')]) {
-                sh "npm config set //registry.npmjs.org/:_authToken=$LOGIN_TOKEN"
-                sh 'npm publish --access public'
+              sh "npm config set //registry.npmjs.org/:_authToken=$LOGIN_TOKEN"
+              sh 'npm publish --access public'
             }
+          }
         }
+      }
+    }
+    stage("Create version bump pull request") {
+      agent {
+        label "master"
+      }
+      steps {
+        script {
+          tdr.createGitHubPullRequest(
+            pullRequestTitle: "Version Bump from build number ${BUILD_NUMBER}",
+            buildUrl: env.BUILD_URL,
+            repo: "tdr-file-metadata",
+            branchToMergeTo: "master",
+            branchToMerge: versionBumpBranch
+          )
+        }
+      }
     }
   }
 }
