@@ -15,6 +15,16 @@ pipeline {
           inheritFrom "npm"
         }
       }
+      when {
+        //Only trigger version bump for non-version bump commits
+        //Prevents infinite loop of creating pull requests for version bumps
+        //Npm version bump commits in format: 0.0.0
+        expression {
+          currentGitCommit = sh(script: "git log -n 1", returnStdout: true).trim()
+          isVersionBump = currentGitCommit ==~ /(\d+)\.(\d+)\.(\d+)/
+          return !isVersionBump
+        }
+      }
       stages {
         stage("Create and push version bump GitHub branch") {
           steps {
