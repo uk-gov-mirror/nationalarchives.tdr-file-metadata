@@ -15,6 +15,15 @@ pipeline {
           inheritFrom "npm"
         }
       }
+      when {
+        //Only trigger version bump for non-version bump commits
+        //Prevents infinite loop of creating pull requests for version bumps
+        //Npm version bump commits in format: 0.0.0
+        expression {
+          currentGitCommit = sh(script: "git log -n 1", returnStdout: true).trim()
+          return !(currentGitCommit ==~ /(\d+)\.(\d+)\.(\d+)/)
+        }
+      }
       stages {
         stage("Create and push version bump GitHub branch") {
           steps {
@@ -48,21 +57,18 @@ pipeline {
             }
           }
         }
-      }
-    }
-    stage("Create version bump pull request") {
-      agent {
-        label "master"
-      }
-      steps {
-        script {
-          tdr.createGitHubPullRequest(
-            pullRequestTitle: "Version Bump from build number ${BUILD_NUMBER}",
-            buildUrl: env.BUILD_URL,
-            repo: "tdr-file-metadata",
-            branchToMergeTo: "master",
-            branchToMerge: versionBumpBranch
-          )
+        stage("Create version bump pull request") {
+          steps {
+            script {
+              tdr.createGitHubPullRequest(
+                pullRequestTitle: "Version Bump from build number ${BUILD_NUMBER}",
+                buildUrl: env.BUILD_URL,
+                repo: "tdr-file-metadata",
+                branchToMergeTo: "master",
+                branchToMerge: versionBumpBranch
+              )
+            }
+          }
         }
       }
     }
