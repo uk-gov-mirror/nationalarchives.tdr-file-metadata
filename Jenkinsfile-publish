@@ -21,8 +21,7 @@ pipeline {
         //Npm version bump commits in format: 0.0.0
         expression {
           currentGitCommit = sh(script: "git log -n 1", returnStdout: true).trim()
-          isVersionBump = currentGitCommit ==~ /(\d+)\.(\d+)\.(\d+)/
-          return !isVersionBump
+          return !(currentGitCommit ==~ /(\d+)\.(\d+)\.(\d+)/)
         }
       }
       stages {
