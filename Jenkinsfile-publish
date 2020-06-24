@@ -22,7 +22,7 @@ pipeline {
         //Npm merge version bump commit messages in format: 'Jenkins generated version bump from build number 000'
         expression {
           currentGitCommit = sh(script: "git log -n 1", returnStdout: true).trim()
-          return !(currentGitCommit =~ (currentGitCommit =~ /$pullRequestTitlePrefix (\d+)/))
+          return !(currentGitCommit =~ /$pullRequestTitlePrefix (\d+)/)
         }
       }
       stages {
