@@ -4,9 +4,18 @@ def versionTag = "v${env.BUILD_NUMBER}"
 def repo = "tdr-file-metadata"
 
 pipeline {
-  agent none
+  agent {
+    label "master"
+  }
 
   stages {
+    stage("Run git secrets") {
+      steps {
+        script {
+          tdr.runGitSecrets(repo)
+        }
+      }
+    }
     stage("Run tests") {
         agent {
             ecs {
@@ -24,9 +33,6 @@ pipeline {
         }
     }
     stage('Post-build') {
-        agent {
-            label "master"
-        }
         when {
             expression { env.BRANCH_NAME == "master"}
         }
