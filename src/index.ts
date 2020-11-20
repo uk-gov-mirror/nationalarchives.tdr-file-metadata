@@ -1,20 +1,19 @@
 import { bytes_to_hex, Sha256 } from "asmcrypto.js"
 import {
   TFileMetadata,
-  TdrFile,
   TTotalChunks,
   TSliceToArray,
   IFileMetadata
 } from "./types"
 
 export const extractFileMetadata: TFileMetadata = async (
-  files,
+  tdrFiles,
   progressFunction,
   chunkSizeBytes = 100000000
 ) => {
   let processedChunks = 0
   let processedFiles = 0
-  const totalChunks = getTotalChunks(files, chunkSizeBytes)
+  const totalChunks = getTotalChunks(tdrFiles, chunkSizeBytes)
   const updateProgress: (
     processedChunks: number,
     processedFiles: number
@@ -22,14 +21,15 @@ export const extractFileMetadata: TFileMetadata = async (
     if (progressFunction) {
       progressFunction({
         percentageProcessed: Math.round((processedChunks / totalChunks) * 100),
-        totalFiles: files.length,
+        totalFiles: tdrFiles.length,
         processedFiles
       })
     }
   }
 
   const arr: IFileMetadata[] = []
-  for (const file of files) {
+  for (const tdrFile of tdrFiles) {
+    const { file, path } = tdrFile
     const chunkCount = Math.ceil(file.size / chunkSizeBytes)
     const sha256 = new Sha256()
     for (let i = 0; i < chunkCount; i += 1) {
@@ -48,7 +48,7 @@ export const extractFileMetadata: TFileMetadata = async (
       checksum,
       size,
       lastModified: new Date(lastModified),
-      path: (<TdrFile>file).webkitRelativePath,
+      path,
       file
     })
     processedFiles += 1
@@ -57,9 +57,9 @@ export const extractFileMetadata: TFileMetadata = async (
   return arr
 }
 
-const getTotalChunks: TTotalChunks = (files, chunkSizeBytes) => {
-  return Array.from(files)
-    .map(file => Math.ceil(file.size / chunkSizeBytes))
+const getTotalChunks: TTotalChunks = (tdrFiles, chunkSizeBytes) => {
+  return tdrFiles
+    .map(file => Math.ceil(file.file.size / chunkSizeBytes))
     .reduce((a, b) => a + b)
 }
 
