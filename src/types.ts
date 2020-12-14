@@ -13,7 +13,7 @@ export interface IProgressInformation {
 }
 
 export type TFileMetadata = (
-  files: File[],
+  files: IFileWithPath[],
   progressFunction?: TProgressFunction | undefined,
   chunkSize?: number
 ) => Promise<IFileMetadata[]>
@@ -26,7 +26,7 @@ export type TGenerateMetadata = (
   chunkProgressFunction: TChunkProgressFunction
 ) => Promise<string>
 
-export type TTotalChunks = (files: File[], chunkSize: number) => number
+export type TTotalChunks = (files: IFileWithPath[], chunkSize: number) => number
 
 export type TSliceToArray = (blob: Blob) => Promise<Uint8Array>
 
@@ -34,6 +34,7 @@ export type TProgressFunction = (
   progressInformation: IProgressInformation
 ) => void
 
-export interface TdrFile extends File {
-  webkitRelativePath: string
+export interface IFileWithPath {
+  file: File
+  path: string
 }
