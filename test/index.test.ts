@@ -1,72 +1,80 @@
 import { extractFileMetadata } from "../src/index"
+import { IFileWithPath } from "../src/types"
 import * as fs from "fs"
 
-test("returns the correct checksum for a file", async () => {
-  const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
+const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
+const file: File = new File([blob], "", { lastModified: 1584027654000 })
 
-  const result = await extractFileMetadata([new File([blob], "")])
+const blobLonger = new Blob([
+  new Uint8Array(fs.readFileSync("test/testfilelonger"))
+])
+const fileLonger = new File([blobLonger], "")
+
+const dummyIFileWithPath = {
+  file: file,
+  path: "/a/path",
+  webkitRelativePath: "/a/path"
+} as IFileWithPath
+
+const dummyLongerIFileWithPath = {
+  file: fileLonger,
+  path: "/a/path",
+  webkitRelativePath: "/a/path"
+} as IFileWithPath
+
+test("returns the correct checksum for a file", async () => {
+  const result = await extractFileMetadata([dummyIFileWithPath])
   expect(result[0].checksum).toEqual(
     "e2d0fe1585a63ec6009c8016ff8dda8b17719a637405a4e23c0ff81339148249"
   )
 })
 
 test("returns the correct checksum for a file with a chunk size smaller than file size", async () => {
-  const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
-
-  const result = await extractFileMetadata([new File([blob], "")], jest.fn(), 1)
+  const result = await extractFileMetadata([dummyIFileWithPath], jest.fn(), 1)
   expect(result[0].checksum).toEqual(
     "e2d0fe1585a63ec6009c8016ff8dda8b17719a637405a4e23c0ff81339148249"
   )
 })
 
 test("returns correct number of results", async () => {
-  const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
-  const file: File = new File([blob], "")
-
-  const result = await extractFileMetadata([file, file, file])
+  const result = await extractFileMetadata([
+    dummyIFileWithPath,
+    dummyIFileWithPath,
+    dummyIFileWithPath
+  ])
   expect(result).toHaveLength(3)
 })
 
 test("returns the correct file size", async () => {
-  const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
-
-  const result = await extractFileMetadata([new File([blob], "")])
+  const result = await extractFileMetadata([dummyIFileWithPath])
   expect(result[0].size).toEqual(19)
 })
 
 test("returns the correct last modified date", async () => {
-  const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
-
-  const result = await extractFileMetadata([
-    new File([blob], "", { lastModified: 1584027654000 })
-  ])
+  const result = await extractFileMetadata([dummyIFileWithPath])
   expect(result[0].lastModified).toEqual(new Date("2020-03-12T15:40:54.000Z"))
 })
 
 test("returns the correct path", async () => {
-  const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
-  const file = new File([blob], "")
-  Object.defineProperty(file, "webkitRelativePath", { value: "/a/path" })
-  const result = await extractFileMetadata([file])
+  const result = await extractFileMetadata([dummyIFileWithPath])
   expect(result[0].path).toEqual("/a/path")
 })
 
 test("returns the original file", async () => {
-  const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
-  const file = new File([blob], "")
-  Object.defineProperty(file, "webkitRelativePath", { value: "/a/path" })
-  const result = await extractFileMetadata([file])
+  const result = await extractFileMetadata([dummyIFileWithPath])
   expect(result[0].file).toEqual(file)
 })
 
 test("calls the callback function correctly", async () => {
-  const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
-  const file = new File([blob], "")
   const callback = jest.fn()
-  const totalFiles = 2
-  await extractFileMetadata([file, file], callback, 10)
+  await extractFileMetadata(
+    [dummyIFileWithPath, dummyIFileWithPath],
+    callback,
+    10
+  )
   const calls = callback.mock.calls
   expect(calls).toHaveLength(6)
+  console.log(calls[0])
   const expectedResults = [
     [0, 25],
     [0, 50],
@@ -80,27 +88,28 @@ test("calls the callback function correctly", async () => {
 })
 
 test("calls the callback function correctly for two differently sized files", async () => {
-  const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
-  const file = new File([blob], "")
-  const blobLonger = new Blob([
-    new Uint8Array(fs.readFileSync("test/testfile"))
-  ])
-  const fileLonger = new File([blobLonger], "")
   const callback = jest.fn()
-  const totalFiles = 2
-  await extractFileMetadata([file, fileLonger], callback, 5)
+  await extractFileMetadata(
+    [dummyIFileWithPath, dummyLongerIFileWithPath],
+    callback,
+    5
+  )
   const calls = callback.mock.calls
 
-  expect(calls).toHaveLength(10)
+  expect(calls).toHaveLength(14)
   const expectedResults = [
-    [0, 13],
+    [0, 8],
+    [0, 17],
     [0, 25],
-    [0, 38],
-    [0, 50],
+    [0, 33],
+    [1, 33],
+    [1, 42],
     [1, 50],
-    [1, 63],
+    [1, 58],
+    [1, 67],
     [1, 75],
-    [1, 88],
+    [1, 83],
+    [1, 92],
     [1, 100],
     [2, 100]
   ]

@@ -1,35 +1,40 @@
 import { bytes_to_hex, Sha256 } from "asmcrypto.js"
 import {
   TFileMetadata,
-  TdrFile,
   TTotalChunks,
   TSliceToArray,
-  IFileMetadata
+  IFileMetadata,
+  IFileWithPath,
+  IProgressInformation
 } from "./types"
 
 export const extractFileMetadata: TFileMetadata = async (
-  files,
-  progressFunction,
+  tdrFiles: IFileWithPath[],
+  progressFunction:
+    | ((progressInformation: IProgressInformation) => void)
+    | undefined,
   chunkSizeBytes = 100000000
 ) => {
-  let processedChunks = 0
-  let processedFiles = 0
-  const totalChunks = getTotalChunks(files, chunkSizeBytes)
+  let processedChunks: number = 0
+  let processedFiles: number = 0
+  const totalChunks: number = getTotalChunks(tdrFiles, chunkSizeBytes)
+
   const updateProgress: (
     processedChunks: number,
     processedFiles: number
-  ) => void = (processedChunks, processedFiles) => {
+  ) => void = (processedChunks: number, processedFiles: number) => {
     if (progressFunction) {
       progressFunction({
         percentageProcessed: Math.round((processedChunks / totalChunks) * 100),
-        totalFiles: files.length,
+        totalFiles: tdrFiles.length,
         processedFiles
       })
     }
   }
 
-  const arr: IFileMetadata[] = []
-  for (const file of files) {
+  const metadataFromTdrFiles: IFileMetadata[] = []
+  for (const tdrFile of tdrFiles) {
+    const { file, path }: IFileWithPath = tdrFile
     const chunkCount = Math.ceil(file.size / chunkSizeBytes)
     const sha256 = new Sha256()
     for (let i = 0; i < chunkCount; i += 1) {
@@ -42,24 +47,28 @@ export const extractFileMetadata: TFileMetadata = async (
     }
     const { size, lastModified } = file
 
-    const result = sha256.finish().result!
+    const result: Uint8Array = sha256.finish().result!
     const checksum = bytes_to_hex(result).trim()
-    arr.push({
+    metadataFromTdrFiles.push({
       checksum,
       size,
       lastModified: new Date(lastModified),
-      path: (<TdrFile>file).webkitRelativePath,
+      path,
       file
     })
     processedFiles += 1
     updateProgress(processedChunks, processedFiles)
   }
-  return arr
+
+  return metadataFromTdrFiles
 }
 
-const getTotalChunks: TTotalChunks = (files, chunkSizeBytes) => {
-  return Array.from(files)
-    .map(file => Math.ceil(file.size / chunkSizeBytes))
+const getTotalChunks: TTotalChunks = (
+  tdrFiles: IFileWithPath[],
+  chunkSizeBytes: number
+) => {
+  return tdrFiles
+    .map(file => Math.ceil(file.file.size / chunkSizeBytes))
     .reduce((a, b) => a + b)
 }
 
