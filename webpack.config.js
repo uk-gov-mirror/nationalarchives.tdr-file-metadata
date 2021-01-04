@@ -19,7 +19,7 @@ module.exports = {
       crypto: false,
     },
   },
-  plugins: [],
+  plugins: [new DtsBundlePlugin()],
   output: {
     filename: "index.js",
     libraryTarget: "umd",
@@ -29,7 +29,7 @@ module.exports = {
 
 function DtsBundlePlugin() {}
 DtsBundlePlugin.prototype.apply = function (compiler) {
-  compiler.plugin("done", function () {
+  compiler.hooks.done.tap("bundle-types", () => {
     var dts = require("dts-bundle")
 
     dts.bundle({
