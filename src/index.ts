@@ -17,7 +17,8 @@ export const extractFileMetadata: TFileMetadata = async (
 ) => {
   let processedChunks: number = 0
   let processedFiles: number = 0
-  const totalChunks: number = getTotalChunks(tdrFiles, chunkSizeBytes)
+  const totalChunks: number =
+    getTotalChunks(tdrFiles, chunkSizeBytes) || tdrFiles.length
 
   const updateProgress: (
     processedChunks: number,
