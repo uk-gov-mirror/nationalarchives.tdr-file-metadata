@@ -6,20 +6,20 @@ const blob = new Blob([new Uint8Array(fs.readFileSync("test/testfile"))])
 const file: File = new File([blob], "", { lastModified: 1584027654000 })
 
 const blobLonger = new Blob([
-  new Uint8Array(fs.readFileSync("test/testfilelonger")),
+  new Uint8Array(fs.readFileSync("test/testfilelonger"))
 ])
 const fileLonger = new File([blobLonger], "")
 
 const dummyIFileWithPath = {
   file: file,
   path: "/a/path",
-  webkitRelativePath: "/a/path",
+  webkitRelativePath: "/a/path"
 } as IFileWithPath
 
 const dummyLongerIFileWithPath = {
   file: fileLonger,
   path: "/a/path",
-  webkitRelativePath: "/a/path",
+  webkitRelativePath: "/a/path"
 } as IFileWithPath
 
 test("returns the correct checksum for a file", async () => {
@@ -40,7 +40,7 @@ test("returns correct number of results", async () => {
   const result = await extractFileMetadata([
     dummyIFileWithPath,
     dummyIFileWithPath,
-    dummyIFileWithPath,
+    dummyIFileWithPath
   ])
   expect(result).toHaveLength(3)
 })
@@ -81,7 +81,7 @@ test("calls the callback function correctly", async () => {
     [1, 50],
     [1, 75],
     [1, 100],
-    [2, 100],
+    [2, 100]
   ]
 
   checkCallbackFunctionCalls(calls, expectedResults)
@@ -111,7 +111,7 @@ test("calls the callback function correctly for two differently sized files", as
     [1, 83],
     [1, 92],
     [1, 100],
-    [2, 100],
+    [2, 100]
   ]
   checkCallbackFunctionCalls(calls, expectedResults)
 })

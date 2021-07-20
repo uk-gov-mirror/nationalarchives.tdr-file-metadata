@@ -1,11 +1,11 @@
 import { bytes_to_hex, Sha256 } from "asmcrypto.js"
 import {
-  TFileMetadata,
-  TTotalChunks,
-  TSliceToArray,
   IFileMetadata,
   IFileWithPath,
   IProgressInformation,
+  TFileMetadata,
+  TSliceToArray,
+  TTotalChunks
 } from "./types"
 
 export const extractFileMetadata: TFileMetadata = async (
@@ -27,7 +27,7 @@ export const extractFileMetadata: TFileMetadata = async (
       progressFunction({
         percentageProcessed: Math.round((processedChunks / totalChunks) * 100),
         totalFiles: tdrFiles.length,
-        processedFiles,
+        processedFiles
       })
     }
   }
@@ -54,7 +54,7 @@ export const extractFileMetadata: TFileMetadata = async (
       size,
       lastModified: new Date(lastModified),
       path,
-      file,
+      file
     })
     processedFiles += 1
     updateProgress(processedChunks, processedFiles)
@@ -68,14 +68,14 @@ const getTotalChunks: TTotalChunks = (
   chunkSizeBytes: number
 ) => {
   return tdrFiles
-    .map((file) => Math.ceil(file.file.size / chunkSizeBytes))
+    .map(file => Math.ceil(file.file.size / chunkSizeBytes))
     .reduce((a, b) => a + b)
 }
 
-const sliceToUintArray: TSliceToArray = async (blob) => {
+const sliceToUintArray: TSliceToArray = async blob => {
   const fileReader = new FileReader()
   fileReader.readAsArrayBuffer(blob)
-  return await new Promise((resolve) => {
+  return await new Promise(resolve => {
     fileReader.onload = () => {
       const { result } = fileReader
       if (result instanceof ArrayBuffer) {
