@@ -69,14 +69,14 @@ const getTotalChunks: TTotalChunks = (
   chunkSizeBytes: number
 ) => {
   return tdrFiles
-    .map(file => Math.ceil(file.file.size / chunkSizeBytes))
+    .map((file) => Math.ceil(file.file.size / chunkSizeBytes))
     .reduce((a, b) => a + b)
 }
 
-const sliceToUintArray: TSliceToArray = async blob => {
+const sliceToUintArray: TSliceToArray = async (blob) => {
   const fileReader = new FileReader()
   fileReader.readAsArrayBuffer(blob)
-  return await new Promise(resolve => {
+  return await new Promise((resolve) => {
     fileReader.onload = () => {
       const { result } = fileReader
       if (result instanceof ArrayBuffer) {
