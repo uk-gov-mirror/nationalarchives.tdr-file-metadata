@@ -1,11 +1,11 @@
 import { bytes_to_hex, Sha256 } from "asmcrypto.js"
 import {
-  TFileMetadata,
-  TTotalChunks,
-  TSliceToArray,
   IFileMetadata,
   IFileWithPath,
   IProgressInformation,
+  TFileMetadata,
+  TSliceToArray,
+  TTotalChunks
 } from "./types"
 
 export const extractFileMetadata: TFileMetadata = async (
@@ -17,7 +17,8 @@ export const extractFileMetadata: TFileMetadata = async (
 ) => {
   let processedChunks: number = 0
   let processedFiles: number = 0
-  const totalChunks: number = getTotalChunks(tdrFiles, chunkSizeBytes)
+  const totalChunks: number =
+    getTotalChunks(tdrFiles, chunkSizeBytes) || tdrFiles.length
 
   const updateProgress: (
     processedChunks: number,
@@ -27,7 +28,7 @@ export const extractFileMetadata: TFileMetadata = async (
       progressFunction({
         percentageProcessed: Math.round((processedChunks / totalChunks) * 100),
         totalFiles: tdrFiles.length,
-        processedFiles,
+        processedFiles
       })
     }
   }
@@ -54,7 +55,7 @@ export const extractFileMetadata: TFileMetadata = async (
       size,
       lastModified: new Date(lastModified),
       path,
-      file,
+      file
     })
     processedFiles += 1
     updateProgress(processedChunks, processedFiles)
