@@ -73,15 +73,13 @@ test("calls the callback function correctly", async () => {
     10
   )
   const calls = callback.mock.calls
-  expect(calls).toHaveLength(6)
+  expect(calls).toHaveLength(4)
   console.log(calls[0])
   const expectedResults = [
     [0, 25],
     [0, 50],
-    [1, 50],
     [1, 75],
-    [1, 100],
-    [2, 100]
+    [1, 100]
   ]
 
   checkCallbackFunctionCalls(calls, expectedResults)
@@ -96,13 +94,12 @@ test("calls the callback function correctly for two differently sized files", as
   )
   const calls = callback.mock.calls
 
-  expect(calls).toHaveLength(14)
+  expect(calls).toHaveLength(12)
   const expectedResults = [
     [0, 8],
     [0, 17],
     [0, 25],
     [0, 33],
-    [1, 33],
     [1, 42],
     [1, 50],
     [1, 58],
@@ -110,8 +107,7 @@ test("calls the callback function correctly for two differently sized files", as
     [1, 75],
     [1, 83],
     [1, 92],
-    [1, 100],
-    [2, 100]
+    [1, 100]
   ]
   checkCallbackFunctionCalls(calls, expectedResults)
 })

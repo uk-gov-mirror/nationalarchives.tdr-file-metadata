@@ -58,7 +58,6 @@ export const extractFileMetadata: TFileMetadata = async (
       file
     })
     processedFiles += 1
-    updateProgress(processedChunks, processedFiles)
   }
 
   return metadataFromTdrFiles
