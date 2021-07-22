@@ -68,9 +68,11 @@ const getTotalChunks: TTotalChunks = (
   tdrFiles: IFileWithPath[],
   chunkSizeBytes: number
 ) => {
-  return tdrFiles
-    .map((file) => Math.ceil(file.file.size / chunkSizeBytes))
-    .reduce((a, b) => a + b)
+  return tdrFiles.reduce(
+    (filesSizeTotal, file) =>
+      filesSizeTotal + Math.ceil(file.file.size / chunkSizeBytes),
+    0
+  )
 }
 
 const sliceToUintArray: TSliceToArray = async (blob) => {
