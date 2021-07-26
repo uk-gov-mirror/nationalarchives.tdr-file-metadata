@@ -35,7 +35,7 @@ export const extractFileMetadata: TFileMetadata = async (
   const metadataFromTdrFiles: IFileMetadata[] = []
   for (const tdrFile of tdrFiles) {
     const { file, path }: IFileWithPath = tdrFile
-    const chunkCount = Math.ceil(file.size / chunkSizeBytes)
+    const chunkCount = Math.ceil((file.size ? file.size : 1) / chunkSizeBytes)
     const sha256 = new Sha256()
     for (let i = 0; i < chunkCount; i += 1) {
       const start = i * chunkSizeBytes
