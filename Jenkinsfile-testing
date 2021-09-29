@@ -5,7 +5,7 @@ def repo = "tdr-file-metadata"
 
 pipeline {
   agent {
-    label "master"
+    label "built-in"
   }
 
   stages {
