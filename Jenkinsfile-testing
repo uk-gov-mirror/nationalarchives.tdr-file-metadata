@@ -7,7 +7,6 @@ pipeline {
   agent {
     label "built-in"
   }
-
   stages {
     stage("Run git secrets") {
       steps {
@@ -17,61 +16,57 @@ pipeline {
       }
     }
     stage("Run tests") {
-        agent {
-            ecs {
-                inheritFrom "npm"
-            }
+      agent {
+        ecs {
+          inheritFrom "npm"
         }
-        steps {
-            script {
-                tdr.reportStartOfBuildToGitHub(repo, env.GIT_COMMIT)
-            }
-            checkout scm
-            sh 'npm ci'
-            sh 'npm test'
-	        sh 'npm run lint'
+      }
+      steps {
+        script {
+          tdr.reportStartOfBuildToGitHub(repo, env.GIT_COMMIT)
         }
+        checkout scm
+        sh 'npm ci'
+        sh 'npm test'
+	    sh 'npm run lint'
+      }
     }
     stage('Post-build') {
-        when {
-            expression { env.BRANCH_NAME == "master"}
-        }
-        stages {
-            stage('Tag Release') {
-                steps {
-                    sh "git tag ${versionTag}"
-                    sshagent(['github-jenkins']) {
-                        sh("git push origin ${versionTag}")
-                    }
-                }
+      when {
+        expression { env.BRANCH_NAME == "master"}
+      }
+      stages {
+        stage('Tag Release') {
+          steps {
+            sh "git tag ${versionTag}"
+            sshagent(['github-jenkins']) {
+              sh("git push origin ${versionTag}")
             }
-            stage('Publish package') {
-                steps {
-                    build(
-                        job: "TDR File Metadata Publish",
-                        parameters: [
-                            string(name: "VERSION", value: "patch")
-                        ],
-                        wait: false)
-                }
-            }
+          }
         }
+        stage('Publish package') {
+          steps {
+            build(
+                  job: "TDR File Metadata Publish",
+                  parameters: [
+                    string(name: "VERSION", value: "patch")
+                  ],
+                  wait: false)
+          }
+        }
+      }
     }
   }
   post {
-          failure {
-            node('master') {
-              script {
-                tdr.reportFailedBuildToGitHub(repo, env.GIT_COMMIT)
-              }
-            }
-          }
-          success {
-            node('master') {
-              script {
-                tdr.reportSuccessfulBuildToGitHub(repo, env.GIT_COMMIT)
-              }
-            }
-          }
+    failure {
+      script {
+        tdr.reportFailedBuildToGitHub(repo, env.GIT_COMMIT)
       }
+    }
+    success {
+      script {
+        tdr.reportSuccessfulBuildToGitHub(repo, env.GIT_COMMIT)
+      }
+    }
+  }
 }
