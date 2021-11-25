@@ -30,7 +30,7 @@
     "@typescript-eslint/eslint-plugin": "^2.23.0",
     "@typescript-eslint/parser": "^2.23.0",
     "dts-bundle": "^0.7.3",
-    "eslint": "^6.8.0",
+    "eslint": "^7.32.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-jest": "^25.3.0",
