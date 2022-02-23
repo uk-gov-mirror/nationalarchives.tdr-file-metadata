@@ -26,7 +26,7 @@
     "url": "https://github.com/nationalarchives/tdr-file-information"
   },
   "devDependencies": {
-    "@types/jest": "^27.4.0",
+    "@types/jest": "^27.4.1",
     "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.12.1",
     "dts-bundle": "^0.7.3",
