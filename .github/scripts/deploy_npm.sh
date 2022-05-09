@@ -4,7 +4,6 @@ git config --global user.name tna-digital-archiving-jenkins
 git checkout -b $BRANCH_NAME
 git push -u origin $BRANCH_NAME
 npm config set //registry.npmjs.org/:_authToken=$1
-cd ts
 npm ci
 npm run build
 npm version patch
