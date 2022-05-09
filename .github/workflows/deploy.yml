@@ -1,6 +1,5 @@
 name: TDR Deploy File Metadata
 on:
-  push:
   workflow_dispatch:
 env:
   RUN_NUMBER: ${{ github.run_id }}${{ github.run_attempt }}
