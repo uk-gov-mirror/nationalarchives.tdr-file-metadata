@@ -1,0 +1,21 @@
+name: TDR Run File Metadata Tests
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - master
+      - release-*
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  test:
+    uses: nationalarchives/tdr-github-actions/.github/workflows/tdr_test.yml@main
+    with:
+      repo-name: tdr-transfer-frontend
+      test-command: |
+          npm ci
+          npm test
+          npm run lint
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
