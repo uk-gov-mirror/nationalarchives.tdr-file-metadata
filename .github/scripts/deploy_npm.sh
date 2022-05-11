@@ -5,7 +5,7 @@ git checkout -b $BRANCH_NAME
 git push -u origin $BRANCH_NAME
 npm config set //registry.npmjs.org/:_authToken=$1
 npm ci
-npm run build
+npm run build:prod
 npm version patch
 git add package.json package-lock.json
 git commit -m 'Update npm version'
