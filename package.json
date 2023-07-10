@@ -1,6 +1,6 @@
 {
   "name": "@nationalarchives/file-information",
-  "version": "1.0.504",
+  "version": "1.0.505",
   "description": "A library for getting file information.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
