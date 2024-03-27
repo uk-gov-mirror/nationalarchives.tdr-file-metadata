@@ -4,5 +4,9 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-
+    groups: 
+      npm-dependencies:
+        applies-to: version-updates
+        patterns: 
+         - "*"
     versioning-strategy: increase
