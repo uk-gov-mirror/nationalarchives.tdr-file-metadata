@@ -10,7 +10,7 @@
   "scripts": {
     "test": "jest",
     "build": "webpack --mode development",
-    "lint": "eslint src/**/*.ts && eslint test/**/*.ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src --ext .ts",
     "build:watch": "webpack --mode development --watch",
     "build:prod": "webpack --mode production && cat dist/types.d.ts >> dist/index.d.ts && rm dist/types.d.ts"
   },
@@ -27,9 +27,9 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.34.1",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
     "@typescript-eslint/parser": "^8.32.1",
-    "eslint": "^8.57.1",
+    "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jest": "^29.0.1",
