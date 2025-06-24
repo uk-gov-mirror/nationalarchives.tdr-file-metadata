@@ -10,7 +10,7 @@
   "scripts": {
     "test": "jest",
     "build": "webpack --mode development",
-    "lint": "eslint src/**/*.ts && eslint test/**/*.ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src --ext .ts",
     "build:watch": "webpack --mode development --watch",
     "build:prod": "webpack --mode production && cat dist/types.d.ts >> dist/index.d.ts && rm dist/types.d.ts"
   },
