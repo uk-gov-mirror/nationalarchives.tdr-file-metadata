@@ -13,6 +13,6 @@
     "moduleResolution": "node",
     "strict": true
   },
-  "include": ["src/*"],
+  "include": ["src/**/*"],
   "exclude": ["dist/**"]
 }
