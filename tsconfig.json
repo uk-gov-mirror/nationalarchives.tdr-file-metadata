@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./dist/",
+    "rootDir": "./src",
     "noImplicitAny": true,
     "module": "es6",
     "target": "ES2017",
@@ -10,7 +11,7 @@
     "sourceMap": true,
     "declaration": true,
     "declarationDir": "./dist",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "strict": true
   },
   "include": ["src/**/*"],
