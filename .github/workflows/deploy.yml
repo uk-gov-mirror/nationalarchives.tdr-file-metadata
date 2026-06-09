@@ -19,7 +19,7 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
       - name: Get NPM version
         id: get-npm-version
-        run: echo "set-npm-version=$(awk '/version/{gsub(/("|",)/,"",$2);print $2}' package.json)"
+        run: echo "version=$(awk '/version/{gsub(/("|",)/,"",$2);print $2}' package.json)"
       - name: Deploy NPM script
         run: |
           ./.github/scripts/deploy_npm.sh ${{ secrets.NPM_TOKEN }}
