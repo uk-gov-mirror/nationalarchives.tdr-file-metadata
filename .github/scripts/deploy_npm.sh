@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 git config --global user.email 181243999+tna-da-bot@users.noreply.github.com
 git config --global user.name tna-da-bot
 git checkout -b $BRANCH_NAME
@@ -10,6 +11,6 @@ npm version patch
 git add package.json package-lock.json
 git commit -m 'Update npm version'
 git push
-npm publish --access public
 echo set-npm-version=$(awk '/version/{gsub(/("|",)/,"",$2);print $2}' package.json) >> $GITHUB_OUTPUT
+npm publish --access public
 cd ..

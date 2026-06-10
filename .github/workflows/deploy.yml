@@ -17,15 +17,26 @@ jobs:
           git_commit_gpgsign: true
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
-      - run: |
+      - name: Get NPM version
+        id: get-npm-version
+        run: echo "version=$(awk '/version/{gsub(/("|",)/,"",$2);print $2}' package.json)" >> $GITHUB_OUTPUT
+      - name: Deploy NPM script
+        run: |
           ./.github/scripts/deploy_npm.sh ${{ secrets.NPM_TOKEN }}
         id: deploy-npm
+      - name: Send failure message
+        id: failure-message
+        if: failure()
+        uses: nationalarchives/tdr-github-actions/.github/actions/slack-send@f318ce8a5d99c08b1235663f97fdb1b35844674e # v0.0.39
+        with:
+          message: ":x: NPM publish failed for version ${{ steps.get-npm-version.outputs.version }} in repo ${{ github.event.repository.name }}"
+          slack-url: ${{ secrets.SLACK_WEBHOOK }}
       - name: Create Pull Request
         run: gh pr create --fill --label 'Version bump'
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_PAT }}
       - name: Send success message
-        uses: nationalarchives/tdr-github-actions/.github/actions/slack-send@1c56dd1e838340ab53c7dc55dbbb974a062a6ae9 # v0.0.6
+        uses: nationalarchives/tdr-github-actions/.github/actions/slack-send@f318ce8a5d99c08b1235663f97fdb1b35844674e # v0.0.39
         with:
           message: ":white_check_mark: File metadata ${{ steps.deploy-npm.outputs.set-npm-version }} has been published"
           slack-url: ${{ secrets.SLACK_WEBHOOK }}
