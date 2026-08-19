@@ -11,8 +11,7 @@ import {
 export const extractFileMetadata: TFileMetadata = async (
   tdrFiles: IFileWithPath[],
   progressFunction:
-    | ((progressInformation: IProgressInformation) => void)
-    | undefined,
+    ((progressInformation: IProgressInformation) => void) | undefined,
   chunkSizeBytes = 100000000
 ) => {
   let processedChunks: number = 0
