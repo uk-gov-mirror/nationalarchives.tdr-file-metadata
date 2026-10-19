@@ -10,5 +10,6 @@ npm run build:prod
 npm version patch -m 'Update npm version v%s'
 git push
 echo set-npm-version=$(awk '/version/{gsub(/("|",)/,"",$2);print $2}' package.json) >> $GITHUB_OUTPUT
+export NPM_ID_TOKEN=$(circleci run oidc get --claims '{"aud": "npm:registry.npmjs.org"}')
 npm publish --access public
 cd ..
