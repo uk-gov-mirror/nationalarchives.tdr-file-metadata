@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nationalarchives/tdr-file-information"
+    "url": "https://github.com/nationalarchives/tdr-file-metadata"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
